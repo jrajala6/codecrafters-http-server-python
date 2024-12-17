@@ -10,11 +10,7 @@ def main():
     #
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     client_socket, client_address = server_socket.accept() # wait for client
-    client_socket.sendall('HTTP/1.1 200 OK\r\n\r\n'.encode())
-
-
-def connection_success(server_socket):
-    server_socket.sendall('HTTP/1.1 200 OK\r\n\r\n'.encode())
+    client_socket.sendall(b'HTTP/1.1 200 OK\r\n\r\n')
 
 if __name__ == "__main__":
     main()
