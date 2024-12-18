@@ -30,7 +30,12 @@ def handle_request(client_socket):
     elif get_request[1].startswith('/files/') and sys.argv[-2] == '--directory' and os.path.isfile(sys.argv[2] + get_request[1][7:]):
         with open(sys.argv[2] + get_request[1][7:], 'r') as f:
             contents = f.read()
-            client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(contents)}\r\n\r\n{contents}'.encode())
+        client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(contents)}\r\n\r\n{contents}'.encode())
+    elif get_request[0] == "POST" and get_request[1].startswith("/files/"):
+        path = sys.argv[2] + get_request[1][7:]
+        with open(path, 'w') as f:
+            f.write(' '.join(get_request[get_request.index('application/octet-stream') + 1:]))
+        client_socket.sendall(b'HTTP/1.1 201 Created\r\n\r\n')
     else:
         client_socket.sendall(b'HTTP/1.1 404 Not Found\r\n\r\n')
 
