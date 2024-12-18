@@ -3,6 +3,7 @@ import socket  # noqa: F401
 from sqlite3 import connect
 import threading
 import sys
+import gzip
 
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -24,6 +25,7 @@ def handle_request(client_socket):
     elif get_request[1].startswith("/echo/"):
         echo_str = get_request[1][6:]
         if "gzip," in get_request or 'gzip' in get_request:
+            echo_str = gzip.decompress(echo_str)
             client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
         else:
             client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
