@@ -23,9 +23,10 @@ def handle_request(client_socket):
         client_socket.sendall(b'HTTP/1.1 200 OK\r\n\r\n')
     elif get_request[1].startswith("/echo/"):
         echo_str = get_request[1][6:]
-        if get_request[-1] == "gzip":
+        if "gzip," in get_request or 'gzip' in get_request:
             client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
-        client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
+        else:
+            client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
     elif get_request[1] == "/user-agent" and get_request[-2] == "User-Agent:":
         client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(get_request[-1])}\r\n\r\n{get_request[-1]}'.encode())
     elif get_request[1].startswith('/files/') and sys.argv[-2] == '--directory' and os.path.isfile(sys.argv[2] + get_request[1][7:]):
