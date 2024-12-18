@@ -1,6 +1,8 @@
+import os
 import socket  # noqa: F401
 from sqlite3 import connect
 import threading
+import sys
 
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -19,13 +21,16 @@ def handle_request(client_socket):
     print(get_request)
     if get_request[1] == "/":
         client_socket.sendall(b'HTTP/1.1 200 OK\r\n\r\n')
-    elif "/echo/" in get_request[1]:
+    elif get_request[1].startswith("/echo/"):
         echo_str = get_request[1][6:]
         client_socket.sendall(
             f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
     elif get_request[1] == "/user-agent" and get_request[-2] == "User-Agent:":
-        client_socket.sendall(
-            f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(get_request[-1])}\r\n\r\n{get_request[-1]}'.encode())
+        client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(get_request[-1])}\r\n\r\n{get_request[-1]}'.encode())
+    elif get_request[1].startswith('/files/') and sys.argv[-2] == '--directory' and os.path.isfile(sys.argv[2] + get_request[1][7:]):
+        with open(sys.argv[2] + get_request[1][7:], 'r') as f:
+            contents = f.read()
+            client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(contents)}\r\n\r\n{contents}'.encode())
     else:
         client_socket.sendall(b'HTTP/1.1 404 Not Found\r\n\r\n')
 
