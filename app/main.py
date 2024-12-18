@@ -12,11 +12,11 @@ def main():
 
     while True:
         client_socket, client_address = server_socket.accept()  # wait for client
-        threading.Thread(target=send_successful_connection_message, args=(client_socket,)).start()
+        threading.Thread(target=handle_request, args=(client_socket,)).start()
 
-def send_successful_connection_message(client_socket):
+def handle_request(client_socket):
     get_request = client_socket.recv(1024).decode().split()
-
+    print(get_request)
     if get_request[1] == "/":
         client_socket.sendall(b'HTTP/1.1 200 OK\r\n\r\n')
     elif "/echo/" in get_request[1]:
