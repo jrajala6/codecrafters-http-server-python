@@ -19,14 +19,14 @@ def main():
 
 def handle_request(client_socket):
     get_request = client_socket.recv(1024).decode().split()
-    print(get_request)
+    #print(get_request)
     if get_request[1] == "/":
         client_socket.sendall(b'HTTP/1.1 200 OK\r\n\r\n')
     elif get_request[1].startswith("/echo/"):
         echo_str = get_request[1][6:]
         if "gzip," in get_request or 'gzip' in get_request:
-            echo_str = gzip.decompress(echo_str)
-            client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
+            echo_str = gzip.compress(echo_str.encode())
+            client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n'.encode() + echo_str)
         else:
             client_socket.sendall(f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(echo_str)}\r\n\r\n{echo_str}'.encode())
     elif get_request[1] == "/user-agent" and get_request[-2] == "User-Agent:":
